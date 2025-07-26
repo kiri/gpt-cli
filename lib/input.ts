@@ -62,7 +62,6 @@ async function multiInput(): Promise<string> {
   const inputs: string[] = [];
   const ps = "You: ";
 
-  const decoder = new TextDecoder();
   const stdin = Deno.stdin;
   const buffer = new Uint8Array(100);
   // 同じ行にプロンプト表示
@@ -74,7 +73,14 @@ async function multiInput(): Promise<string> {
     if (n === null) {
       break;
     }
-    const input = decoder.decode(buffer.subarray(0, n)).trim();
+    const inputBytes = buffer.subarray(0, n);
+    let input: string;
+
+    try {
+      input = new TextDecoder("utf-8", { fatal: true }).decode(inputBytes).trim();
+    } catch (_) {
+      input = new TextDecoder("shift_jis").decode(inputBytes).trim();
+    }
     // 空行は無視して入力受付を継続する
     if (input === "") {
       continue;
