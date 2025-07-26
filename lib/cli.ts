@@ -2,6 +2,7 @@ import { Params, parseArgs } from "./params.ts";
 
 const commandMessage = `
 Ctrl+D to confirm input.
+(On Windows, Ctrl+Z Enter)
 
 Help:
   /?, /help         Help for a command
