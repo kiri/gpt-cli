@@ -2,6 +2,7 @@
 /_plugin/
 /denops/
 /gpt
+/gpt.exe
 /gpt-cli_test.ts
 /*node_modules
 /package*.json
