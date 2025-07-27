@@ -28,6 +28,7 @@ import { ChatOpenAI } from "npm:@langchain/openai";
 import { ChatAnthropic } from "npm:@langchain/anthropic";
 import { ChatGoogleGenerativeAI } from "npm:@langchain/google-genai";
 import { ChatXAI } from "npm:@langchain/xai";
+import { AzureChatOpenAI } from "npm:@langchain/openai";
 
 import { Params } from "./params.ts";
 
@@ -35,7 +36,8 @@ export type CloseModel =
   | ChatOpenAI
   | ChatAnthropic
   | ChatGoogleGenerativeAI
-  | ChatXAI;
+  | ChatXAI
+  | AzureChatOpenAI;
 
 type ModelMap = { [key: string]: (params: Params) => CloseModel };
 
@@ -81,10 +83,22 @@ const createXAIInstance = (params: Params): ChatXAI => {
   });
 };
 
+const createAzureOpenAIInstance = (params: Params): AzureChatOpenAI => {
+  return new AzureChatOpenAI({
+    azureOpenAIApiKey: params.apiKey,           // 追加で必要なフィールド
+    azureOpenAIApiVersion: params.apiVersion,   // 追加で必要なフィールド
+    azureOpenAIEndpoint: params.endpoint,       // 追加で必要なフィールド
+    deploymentName: params.model,               // モデル名は deploymentName にマップ
+    temperature: params.temperature,
+    maxTokens: params.maxTokens,
+  });
+};
+
 export const modelMap: ModelMap = {
   "^gpt": createOpenAIInstance,
   "^o[0-9]": createOpenAIOModelInstance,
   "^claude": createAnthropicInstance,
   "^gem": createGoogleGenerativeAIInstance,
   "^grok": createXAIInstance,
+  "^azure": createAzureOpenAIInstance, // ← 追加
 } as const;

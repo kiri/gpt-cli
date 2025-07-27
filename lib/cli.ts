@@ -31,6 +31,9 @@ const helpMessage =
       -f, --file: string  Attachment file path.
       -n, --no-chat: boolean   No chat mode. Just one time question and answer.
       -o, --timeout: number    Timeout in seconds for waiting for the AI response (default 30)
+     --azure-api-key: string       Azure OpenAI API key
+     --azure-api-version: string   Azure OpenAI API version (e.g. 2023-07-01-preview)
+     --azure-endpoint: string      Azure OpenAI endpoint URL (e.g. https://your-resource-name.openai.azure.com/)
     PROMPT:
       string A Questions for Model
     Models:

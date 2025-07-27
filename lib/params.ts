@@ -11,6 +11,11 @@ export type Params = {
   systemPrompt?: string;
   content?: string;
   timeout?: number;
+
+  // Azure OpenAI 用の追加フィールド
+  apiKey?: string;
+  apiVersion?: string;
+  endpoint?: string;
 } & LLMParam;
 
 /** Parse console argument */
@@ -40,6 +45,9 @@ export function parseArgs(): Params {
       "max-tokens",
       "o",
       "timeout",
+      "azure-api-key",
+      "azure-api-version",
+      "azure-endpoint",
       // parse()で解釈すると最後に指定したものに上書きされてしまう
       // "f",
       // "file",
@@ -71,6 +79,9 @@ export function parseArgs(): Params {
     content: args._.length > 0 ? args._.join(" ") : undefined,
     // string array option
     files: files.length !== 0 ? files : undefined,
+    apiKey: args["azure-api-key"] || Deno.env.get("AZURE_OPENAI_API_KEY") || undefined,
+    apiVersion: args["azure-api-version"] || Deno.env.get("AZURE_OPENAI_API_VERSION") || undefined,
+    endpoint: args["azure-endpoint"] || Deno.env.get("AZURE_OPENAI_ENDPOINT") || undefined,
   };
 }
 
