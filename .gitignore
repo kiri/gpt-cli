@@ -6,3 +6,4 @@
 /gpt-cli_test.ts
 /*node_modules
 /package*.json
+/deno.lock
