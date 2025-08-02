@@ -34,6 +34,7 @@ import {
   isSlashCommand,
   modelStack,
 } from "./lib/command.ts";
+import { autoSave } from "./lib/session.ts";
 
 const VERSION = "v0.9.7";
 
@@ -103,6 +104,7 @@ async function userSession(
       throw new Error("LLM can not answer your question");
     }
     messages.push(aiMessage);
+    await autoSave(messages, params.model);
 
     return { llm, messages };
   } catch (error) {

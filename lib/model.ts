@@ -83,12 +83,26 @@ const createXAIInstance = (params: Params): ChatXAI => {
   });
 };
 
-const createAzureOpenAIInstance = (params: Params): AzureChatOpenAI => {
+/*const createAzureOpenAIInstance = (params: Params): AzureChatOpenAI => {
   return new AzureChatOpenAI({
     azureOpenAIApiKey: params.apiKey,           // 追加で必要なフィールド
     azureOpenAIApiVersion: params.apiVersion,   // 追加で必要なフィールド
     azureOpenAIEndpoint: params.endpoint,       // 追加で必要なフィールド
     deploymentName: params.model,               // モデル名は deploymentName にマップ
+    temperature: params.temperature,
+    maxTokens: params.maxTokens,
+  });
+};*/
+export const createAzureOpenAIInstance = (params: Params): AzureChatOpenAI => {
+  const deploymentName = params.model.startsWith("azure-")
+    ? params.model.slice("azure-".length)
+    : params.model;
+
+  return new AzureChatOpenAI({
+    azureOpenAIApiKey: params.apiKey,
+    azureOpenAIApiVersion: params.apiVersion,
+    azureOpenAIEndpoint: params.endpoint,
+    deploymentName,
     temperature: params.temperature,
     maxTokens: params.maxTokens,
   });

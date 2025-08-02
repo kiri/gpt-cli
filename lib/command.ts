@@ -3,6 +3,14 @@ import type { BaseMessage } from "npm:@langchain/core/messages";
 
 import { CommandLineInterface } from "./cli.ts";
 import { filesGenerator, parseFileContent } from "./file.ts";
+import {
+  saveSession,
+  loadSession,
+  listSessions,
+  deleteSession,
+  autoSave,
+  resumeLatestSession,
+} from "./session.ts";
 
 /** この会話で使用したLLM モデルの履歴 */
 export const modelStack: Set<string> = new Set();
@@ -15,7 +23,12 @@ export type _Command =
   | "/bye"
   | "/exit"
   | "/quit"
-  | "/file";
+  | "/file"
+  | "/save"
+  | "/load"
+  | "/sessions"
+  | "/delete"
+  | "/resume-latest";
 
 export enum Command {
   Help = "HELP",
@@ -23,6 +36,11 @@ export enum Command {
   ModelStack = "MODELSTACK",
   Bye = "BYE",
   File = "FILE",
+  Save = "SAVE",
+  Load = "LOAD",
+  Sessions = "SESSIONS",
+  Delete = "DELETE",
+  ResumeLatest = "RESUME_LATEST",
 }
 
 // Command 型の型ガード
@@ -49,6 +67,11 @@ export const newSlashCommand = (
     "/exit": Command.Bye,
     "/quit": Command.Bye,
     "/file": Command.File,
+    "/save": Command.Save,
+    "/load": Command.Load,
+    "/sessions": Command.Sessions,
+    "/delete": Command.Delete,
+    "/resume-latest": Command.ResumeLatest,
   };
   const command = commandMap[input0 as _Command];
   if (!command) {
@@ -56,7 +79,10 @@ export const newSlashCommand = (
   }
 
   // Handle special cases for commands that need additional arguments
-  if (command === Command.File && inputParts.length > 1) {
+  if (
+    [Command.File, Command.Save, Command.Load, Command.Delete].includes(command) &&
+    inputParts.length > 1
+  ) {
     return { command, path: inputParts[1] };
   }
 
@@ -83,20 +109,21 @@ export async function handleSlashCommand(
 ): Promise<BaseMessage[]> {
   // Handle case where commandInput is a command object with path
   if (typeof commandInput === "object" && "command" in commandInput) {
+    const { command, path} = commandInput;
+
     // Handle /file command
-    if (commandInput.command === Command.File) {
-      const filePattern = commandInput.path;
+    if (command === Command.File) {
       try {
         // グレーアウトしたテキストを表示
         CommandLineInterface.printGray(
-          `Attaching file(s) matching pattern: ${filePattern}...`,
+          `Attaching file(s) matching pattern: ${path}...`,
         );
 
         // ファイルパターンを解釈して全てのマッチするファイルを処理
         let fileCount = 0;
         let allContent = "";
 
-        for await (const filePath of filesGenerator([filePattern])) {
+        for await (const filePath of filesGenerator([path])) {
           try {
             const codeBlock = await parseFileContent(filePath);
             if (codeBlock.content) {
@@ -123,19 +150,39 @@ export async function handleSlashCommand(
           );
         } else {
           CommandLineInterface.printGray(
-            `No files found matching pattern: ${filePattern}`,
+            `No files found matching pattern: ${path}`,
           );
         }
       } catch (error) {
         CommandLineInterface.printGrayError(
-          `Error processing file pattern ${filePattern}: ${error}`,
+          `Error processing file pattern ${path}: ${error}`,
         );
       }
       return messages;
     }
 
+    if (command === Command.Save) {
+      await saveSession(path, messages, CommandLineInterface.getInstance().params.model);
+      console.log(`✅ Session '${path}' saved.`);
+      return messages;
+    }
+
+    if (command === Command.Load) {
+      const { model, messages: loadedMessages } = await loadSession(path);
+      console.log(`📂 Session '${path}' loaded with model '${model}'.`);
+      modelStack.add(model);
+      CommandLineInterface.getInstance().params.model = model;
+      return loadedMessages;
+    }
+
+    if (command === Command.Delete) {
+      await deleteSession(path);
+      console.log(`🗑️ Session '${path}' deleted.`);
+      return messages;
+    }
+
     // Extract just the command enum for other command types
-    commandInput = commandInput.command;
+    commandInput = command;
   }
 
   // Handle standard commands
@@ -158,10 +205,40 @@ export async function handleSlashCommand(
       console.log(`You were chat with them...\n${[...modelStack].join("\n")}`);
       break;
     }
+    case Command.Sessions: {
+      const sessions = await listSessions();
+      console.log("📁 Saved sessions:");
+      sessions.forEach(s => console.log(`- ${s}`));
+      break;
+    }
+
+    case Command.ResumeLatest: {
+      const content = await resumeLatestSession();
+      if (content) {
+        const restored = JSON.parse(content);
+        const { model, messages: loadedMessages } = restored;
+        console.log(`📂 Resumed latest session with model '${model}'`);
+        modelStack.add(model);
+        CommandLineInterface.getInstance().params.model = model;
+        return loadedMessages;
+      } else {
+        console.log("⚠️ No session found to resume.");
+        return messages;
+      }
+    }
     case Command.Bye: {
       Deno.exit(0);
     }
   }
+
+  // 自動保存処理
+  try {
+    const cli = CommandLineInterface.getInstance();
+    await autoSave(messages, cli.params.model);
+  } catch (error) {
+    CommandLineInterface.printGrayError(`AutoSave failed: ${error}`);
+  }
+
   // messagesをそのまま返す
   return messages;
 }
