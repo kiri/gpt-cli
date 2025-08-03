@@ -342,11 +342,9 @@ hook_add = '''
 '''
 ```
 
-![Peek 2024-04-01 03-35.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/113494/f243f19b-ee47-9821-5899-7ed2acc17320.gif)
 
 By setting your own prompt in the GPT() function, the AI will return a one-shot document based on your own document with your own arrangements.
 
-![Peek 2024-04-01 04-43.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/113494/23286593-1418-d2cc-451a-e22efe7f3fa8.gif)
 
 The GPTWindow() function allows you to open a terminal and interact with AI on Vim by putting a case-by-case system prompt in the command line.
 
