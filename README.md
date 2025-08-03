@@ -304,8 +304,6 @@ See [gpt-cli/test](https://github.com/u1and0/gpt-cli/tree/main/test)
 This is a Vimmer-only option.
 This option brings a Github Copilot-like experience to your Vim.
 
-![Peek 2024-03-30 11-05.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/113494/5c19c1f2-cecf-59df-c6ff-6dc2c364feca.gif)
-
 For example, if you want to manage plug-ins with dein, write a toml file like this.
 
 ```toml
