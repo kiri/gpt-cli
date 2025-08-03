@@ -1,11 +1,8 @@
 <img src="https://img.shields.io/badge/version-v0.9.7-FF7777.svg"></img>
 <img src="https://img.shields.io/badge/LICENSE-MIT-3388FF.svg"></img>
 <img src="https://shield.deno.dev/deno/%5E1.39"></img>
-<img src="https://github.com/u1and0/gpt-cli/actions/workflows/deno.yml/badge.svg"></img>
 
 Command-line interface  that enables interactive chat with LLMs.
-
-![Peek 2024-03-30 20-03.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/113494/a15731ab-c7a7-c242-28ed-8abc6252c565.gif)
 
 # Quick start
 
